@@ -10,3 +10,4 @@
 4. Revenge RAT 远控木马
 5. 熊猫烧香
 6. rmnet 感染病毒
+7. MBR引导病毒
