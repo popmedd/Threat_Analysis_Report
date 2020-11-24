@@ -1,0 +1,44 @@
+// 初始化变量
+
+ // 临时变量，用来保存API地址
+MOV dwEAX,0 
+
+// 当EIP执行到这个地址的时候API放在EAX中 
+MOV dwGetProcAddr,0049d5BF
+ 
+// 当EIP执行到这个地址的时候IAT刚刚被填充为申请的那段内存地址
+// 其地址中保存的是加密后的API地址，以及动态解密代码 
+MOV dwWriteIATAddr,0049d5F0
+
+MOV dwOEPAddr,0044848d // IEP执行到OEP就可以dump了
+
+// 清除所有软件断点
+BC
+
+// 清除所有硬件断点
+BPHWCALL
+
+// 设置硬件执行断点
+BPHWS dwGetProcAddr,"x"
+BPHWS dwWriteIATAddr,"x"
+BPHWS dwOEPAddr,"x"
+
+LOOP1:
+  RUN  
+
+CASE1:
+  CMP eip,dwGetProcAddr
+  JNE CASE2   
+  MOV dwEAX,eax     
+  JMP LOOP1   
+
+CASE2:
+  CMP eip,dwWriteIATAddr  
+  JNE CASE3
+  MOV [edi],dwEAX   
+  JMP LOOP1     
+
+CASE3:
+  CMP eip,dwOEPAddr   
+  JNE LOOP1
+  MSG "到达OEP，可以dump了！！！"
